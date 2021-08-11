@@ -43,147 +43,80 @@ if (!isset($_GET["file"])) {
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Peaks.js Demo Page</title>
-    <style>
-      body {
-        font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
-      }
-
-      #titles, #waveform-container {
-        margin: 24px auto;
-        width: 1000px;
-      }
-
-      #zoomview-container, #overview-container {
-        margin: 0 0 24px 0;
-        line-height: 0;
-        -moz-box-shadow: 3px 3px 20px #919191;
-        -webkit-box-shadow: 3px 3px 20px #919191;
-        box-shadow: 3px 3px 20px #919191;
-      }
-
-      #zoomview-container {
-        height: 200px;
-      }
-
-      #overview-container {
-        height: 85px;
-      }
-
-      #demo-controls {
-        margin: 0 auto 24px auto;
-        width: 1000px;
-        display: flex;
-        align-items: center;
-      }
-
-      #demo-controls button {
-        background: #fff;
-        border: 1px solid #919191;
-        cursor: pointer;
-      }
-
-      #audio {
-        flex: 0 0 30%;
-      }
-
-      #controls {
-        flex: 1;
-        margin-left: 1em;
-      }
-
-      #seek-time {
-        width: 4em;
-      }
-
-      .log {
-        margin: 0 auto 24px auto;
-        width: 1000px;
-      }
-
-      table {
-        width: 100%;
-      }
-
-      table th {
-        text-align: left;
-      }
-
-      table th, table td {
-        padding: 0.5em;
-      }
-
-      .hide {
-        display: none;
-      }
-    </style>
+    <title><?=$file?></title>
+    <link rel="stylesheet" href="main.css" />
   </head>
   <body>
-
-    <div id="waveform-container">
-      <div id="zoomview-container"></div>
-      <div id="overview-container"></div>
-    </div>
-
-    <div id="demo-controls">
-      <audio id="audio" controls="controls">
-        <source src="<?=$file?>" type="audio/mpeg">
-        Your browser does not support the audio element.
-      </audio>
-
-      <div id="controls">
-        <button data-action="zoom-in">Zoom in</button>
-        <button data-action="zoom-out">Zoom out</button>
-        <button data-action="add-segment">Add a Segment at current time</button>
-        <button data-action="add-point">Add a Point at current time</button>
-        <button data-action="log-data">Log segments/points</button>
-        <input type="text" id="seek-time" value="0.0">
-        <button data-action="seek">Seek</button>
-        <label for="amplitude-scale">Amplitude scale</label>
-        <input type="range" id="amplitude-scale" min="0" max="10" step="1">
-        <input type="checkbox" id="auto-scroll" checked>
-        <label for="auto-scroll">Auto-scroll</label>
-        <button data-action="resize">Resize</button>
-        <button data-action="toggle-zoomview">Show/hide zoomable waveform</button>
-        <button data-action="toggle-overview">Show/hide overview waveform</button>
-        <button data-action="destroy">Destroy</button>
-      </div>
-    </div>
-
-    <div class="log">
-      <div id="segments" class="hide">
-        <h2>Segments</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Label</th>
-              <th>Start time</th>
-              <th>End time</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+    <div class="container">
+      <div>
+        <h1><?=$file?></h1>
       </div>
 
-      <div id="points" class="hide">
-        <h2>Points</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Label</th>
-              <th>Time</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+      <div id="waveform-container">
+        <div id="zoomview-container"></div>
+        <div id="overview-container"></div>
       </div>
-    </div>
 
+      <div id="demo-controls">
+        <audio id="audio" controls="controls">
+          <source src="<?=$file?>" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+
+        <div id="controls">
+          <button data-action="zoom-in">Zoom in</button>
+          <button data-action="zoom-out">Zoom out</button>
+          <button data-action="add-segment">Add a Segment at current time</button>
+          <button data-action="add-point">Add a Point at current time</button>
+          <button data-action="log-data">Log segments/points</button>
+          <input type="text" id="seek-time" value="0.0">
+          <button data-action="seek">Seek</button>
+          <label for="amplitude-scale">Amplitude scale</label>
+          <input type="range" id="amplitude-scale" min="0" max="10" step="1">
+          <input type="checkbox" id="auto-scroll" checked>
+          <label for="auto-scroll">Auto-scroll</label>
+          <button data-action="resize">Resize</button>
+          <button data-action="toggle-zoomview">Show/hide zoomable waveform</button>
+          <button data-action="toggle-overview">Show/hide overview waveform</button>
+          <button data-action="destroy">Destroy</button>
+        </div>
+      </div>
+
+      <div class="log">
+        <div id="segments" class="hide">
+          <h2>Segments</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Label</th>
+                <th>Start time</th>
+                <th>End time</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="points" class="hide">
+          <h2>Points</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Label</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
     <script src="peaks.js"></script>
     <script>
       (function(Peaks) {
