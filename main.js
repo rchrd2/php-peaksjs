@@ -1,7 +1,22 @@
 (function(Peaks) {
+  Object.assign(options, {
+    containers: {
+      zoomview: document.getElementById('zoomview-container'),
+      overview: document.getElementById('overview-container')
+    },
+    mediaElement: document.getElementById('audio'),
+
+    keyboard: true,
+    pointMarkerColor: '#006eb0',
+    showPlayheadTime: true,
+    zoomLevels: [ 256, 512, 1024, 2048, 4096],
+  })
+
   var renderSegments = function(peaks) {
     var segmentsContainer = document.getElementById('segments');
     var segments = peaks.segments.getSegments();
+    console.log(segments);
+
     var html = '';
 
     for (var i = 0; i < segments.length; i++) {
@@ -91,6 +106,7 @@
   var renderPoints = function(peaks) {
     var pointsContainer = document.getElementById('points');
     var points = peaks.points.getPoints();
+    console.log(points);
     var html = '';
 
     for (var i = 0; i < points.length; i++) {
@@ -145,26 +161,19 @@
     });
   };
 
-  var options = {
-    containers: {
-      zoomview: document.getElementById('zoomview-container'),
-      overview: document.getElementById('overview-container')
-    },
-    mediaElement: document.getElementById('audio'),
-    dataUri: {
-      arraybuffer: '<?=$wf_dat_file?>',
-      // json: '<?=$wf_json_file?>'
-    },
-    keyboard: true,
-    pointMarkerColor: '#006eb0',
-    showPlayheadTime: true
-  };
-
   Peaks.init(options, function(err, peaksInstance) {
     if (err) {
       console.error(err.message);
       return;
     }
+
+    // does not seem to be supported in my version
+    // var view = peaksInstance.views.getView('zoomview');
+    // view.setWheelMode('scroll');
+
+    // enable markers on overview
+    const view = peaksInstance.views.getView('overview');
+    view.enableMarkerEditing(true);
 
     console.log("Peaks instance ready");
 
@@ -181,10 +190,12 @@
     document.querySelector('button[data-action="add-segment"]').addEventListener('click', function() {
       peaksInstance.segments.add({
         startTime: peaksInstance.player.getCurrentTime(),
-        endTime: peaksInstance.player.getCurrentTime() + 10,
+        endTime: peaksInstance.player.getCurrentTime() + 40,
         labelText: 'Test segment ' + segmentCounter++,
         editable: true
       });
+      renderSegments(peaksInstance);
+      renderPoints(peaksInstance);
     });
 
     document.querySelector('button[data-action="add-point"]').addEventListener('click', function() {
@@ -193,6 +204,8 @@
         labelText: 'Test point',
         editable: true
       });
+      renderSegments(peaksInstance);
+      renderPoints(peaksInstance);
     });
 
     document.querySelector('button[data-action="log-data"]').addEventListener('click', function(event) {
@@ -216,6 +229,11 @@
     document.getElementById('auto-scroll').addEventListener('change', function(event) {
       var view = peaksInstance.views.getView('zoomview');
       view.enableAutoScroll(event.target.checked);
+    });
+
+    document.querySelector('button[data-action="save"]').addEventListener('click', function(event) {
+      var points = peaksInstance.points.getPoints();
+      console.log(points.map(p => ({startTime: p.startTime} = p))); // TODO save
     });
 
     document.querySelector('body').addEventListener('click', function(event) {

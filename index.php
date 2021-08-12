@@ -1,21 +1,23 @@
 <?php
 // php -S localhost:8000
-
-$media_dir = $_SERVER["REMOTE_ADDR"] == "::1" ? "media/2021" : __DIR__."/../transit";
-$file = $_GET["file"] ?? "/media/2021/2021-08-04/210804_155746/210804_155023%20-%20project%20-%20mix%202.mp3";
+$is_localhost = $_SERVER["REMOTE_ADDR"] == "::1";
+$media_dir = $is_localhost ? "media/2021" : realpath(__DIR__."/../transit");
+$file = $_GET["file"] ;
 $wf_dat_file = "$file.dat";
 $wf_json_file = "$file.json";
 
 if (!isset($_GET["file"])) {
 
+  ?>
+  <h1>Index of <?=$media_dir?></h1><hr/>
+  <?
+
   function iterateDirectory($i) {
       echo '<ul>';
       foreach ($i as $path) {
-          $relative_path = str_replace(__DIR__, "", $path);
+          $relative_path = str_replace("/home/rcaceres/sites/net.rchrd.dev/web", "", $path);
           if ($path->isDir()) {
-              // echo "<li>$relative_path<ul>";
               iterateDirectory($path);
-              // echo '</ul></li>';
           } else {
             if (file_exists("$path.dat")) {
               echo "<li><a href='?file=".urlencode($relative_path)."'>$relative_path</a></li>";
@@ -53,8 +55,8 @@ if (!isset($_GET["file"])) {
       </div>
 
       <div id="waveform-container">
-        <div id="zoomview-container"></div>
         <div id="overview-container"></div>
+        <div id="zoomview-container"></div>
       </div>
 
       <div id="demo-controls">
@@ -69,16 +71,17 @@ if (!isset($_GET["file"])) {
           <button data-action="add-segment">Add a Segment at current time</button>
           <button data-action="add-point">Add a Point at current time</button>
           <button data-action="log-data">Log segments/points</button>
-          <input type="text" id="seek-time" value="0.0">
-          <button data-action="seek">Seek</button>
-          <label for="amplitude-scale">Amplitude scale</label>
-          <input type="range" id="amplitude-scale" min="0" max="10" step="1">
-          <input type="checkbox" id="auto-scroll" checked>
-          <label for="auto-scroll">Auto-scroll</label>
-          <button data-action="resize">Resize</button>
-          <button data-action="toggle-zoomview">Show/hide zoomable waveform</button>
-          <button data-action="toggle-overview">Show/hide overview waveform</button>
-          <button data-action="destroy">Destroy</button>
+          <input class="hide" type="text" id="seek-time" value="0.0">
+          <button class="hide" data-action="seek">Seek</button>
+          <label class="hide" for="amplitude-scale">Amplitude scale</label>
+          <input class="hide" type="range" id="amplitude-scale" min="0" max="10" step="1">
+          <input class="hide" type="checkbox" id="auto-scroll" checked>
+          <label class="hide" for="auto-scroll">Auto-scroll</label>
+          <button class="hide" data-action="resize">Resize</button>
+          <button class="hide" data-action="toggle-zoomview">Show/hide zoomable waveform</button>
+          <button class="hide" data-action="toggle-overview">Show/hide overview waveform</button>
+          <button class="hide" data-action="destroy">Destroy</button>
+          <button class="hide2" data-action="save">Save</button>
         </div>
       </div>
 
@@ -119,394 +122,22 @@ if (!isset($_GET["file"])) {
     </div>
     <script src="peaks.js"></script>
     <script>
-      (function(Peaks) {
-        var renderSegments = function(peaks) {
-          var segmentsContainer = document.getElementById('segments');
-          var segments = peaks.segments.getSegments();
-          var html = '';
-
-          for (var i = 0; i < segments.length; i++) {
-            var segment = segments[i];
-
-            var row = '<tr>' +
-              '<td>' + segment.id + '</td>' +
-              '<td><input data-action="update-segment-label" type="text" value="' + segment.labelText + '" data-id="' + segment.id + '"/></td>' +
-              '<td><input data-action="update-segment-start-time" type="number" value="' + segment.startTime + '" data-id="' + segment.id + '"/></td>' +
-              '<td><input data-action="update-segment-end-time" type="number" value="' + segment.endTime + '" data-id="' + segment.id + '"/></td>' +
-              '<td>' + '<a href="#' + segment.id + '" data-action="play-segment" data-id="' + segment.id + '">Play</a>' + '</td>' +
-              '<td>' + '<a href="#' + segment.id + '" data-action="loop-segment" data-id="' + segment.id + '">Loop</a>' + '</td>' +
-              '<td>' + '<a href="#' + segment.id + '" data-action="remove-segment" data-id="' + segment.id + '">Remove</a>' + '</td>' +
-              '</tr>';
-
-            html += row;
-          }
-
-          segmentsContainer.querySelector('tbody').innerHTML = html;
-
-          if (html.length) {
-            segmentsContainer.classList.remove('hide');
-          }
-
-          document.querySelectorAll('input[data-action="update-segment-start-time"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var segment = peaks.segments.getSegment(id);
-
-              if (segment) {
-                var startTime = parseFloat(element.value);
-
-                if (startTime < 0) {
-                  startTime = 0;
-                  element.value = 0;
-                }
-
-                if (startTime >= segment.endTime) {
-                  startTime = segment.endTime - 0.1;
-                  element.value = startTime;
-                }
-
-                segment.update({ startTime: startTime });
-              }
-            });
-          });
-
-          document.querySelectorAll('input[data-action="update-segment-end-time"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var segment = peaks.segments.getSegment(id);
-
-              if (segment) {
-                var endTime = parseFloat(element.value);
-
-                if (endTime < 0) {
-                  endTime = 0;
-                  element.value = 0;
-                }
-
-                if (endTime <= segment.startTime) {
-                  endTime = segment.startTime + 0.1;
-                  element.value = endTime;
-                }
-
-                segment.update({ endTime: endTime });
-              }
-            });
-          });
-
-          document.querySelectorAll('input[data-action="update-segment-label"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var segment = peaks.segments.getSegment(id);
-              var labelText = element.labelText;
-
-              if (segment) {
-                segment.update({ labelText: labelText });
-              }
-            });
-          });
-        };
-
-        var renderPoints = function(peaks) {
-          var pointsContainer = document.getElementById('points');
-          var points = peaks.points.getPoints();
-          var html = '';
-
-          for (var i = 0; i < points.length; i++) {
-            var point = points[i];
-
-            var row = '<tr>' +
-              '<td>' + point.id + '</td>' +
-              '<td><input data-action="update-point-label" type="text" value="' + point.labelText + '" data-id="' + point.id + '"/></td>' +
-              '<td><input data-action="update-point-time" type="number" value="' + point.time + '" data-id="' + point.id + '"/></td>' +
-              '<td>' + '<a href="#' + point.id + '" data-action="remove-point" data-id="' + point.id + '">Remove</a>' + '</td>' +
-              '</tr>';
-
-            html += row;
-          }
-
-          pointsContainer.querySelector('tbody').innerHTML = html;
-
-          if (html.length) {
-            pointsContainer.classList.remove('hide');
-          }
-
-          document.querySelectorAll('input[data-action="update-point-time"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var point = peaks.points.getPoint(id);
-
-              if (point) {
-                var time = parseFloat(element.value);
-
-                if (time < 0) {
-                  time = 0;
-                  element.value = 0;
-                }
-
-                point.update({ time: time });
-              }
-            });
-          });
-
-          document.querySelectorAll('input[data-action="update-point-label"]').forEach(function(inputElement) {
-            inputElement.addEventListener('input', function(event) {
-              var element = event.target;
-              var id = element.getAttribute('data-id');
-              var point = peaks.points.getPoint(id);
-              var labelText = element.labelText;
-
-              if (point) {
-                point.update({ labelText: labelText });
-              }
-            });
-          });
-        };
-
-        var options = {
-          containers: {
-            zoomview: document.getElementById('zoomview-container'),
-            overview: document.getElementById('overview-container')
-          },
-          mediaElement: document.getElementById('audio'),
-          dataUri: {
-            arraybuffer: '<?=$wf_dat_file?>',
-            // json: '<?=$wf_json_file?>'
-          },
-          keyboard: true,
-          pointMarkerColor: '#006eb0',
-          showPlayheadTime: true
-        };
-
-        Peaks.init(options, function(err, peaksInstance) {
-          if (err) {
-            console.error(err.message);
-            return;
-          }
-
-          console.log("Peaks instance ready");
-
-          document.querySelector('[data-action="zoom-in"]').addEventListener('click', function() {
-            peaksInstance.zoom.zoomIn();
-          });
-
-          document.querySelector('[data-action="zoom-out"]').addEventListener('click', function() {
-            peaksInstance.zoom.zoomOut();
-          });
-
-          var segmentCounter = 1;
-
-          document.querySelector('button[data-action="add-segment"]').addEventListener('click', function() {
-            peaksInstance.segments.add({
-              startTime: peaksInstance.player.getCurrentTime(),
-              endTime: peaksInstance.player.getCurrentTime() + 10,
-              labelText: 'Test segment ' + segmentCounter++,
-              editable: true
-            });
-          });
-
-          document.querySelector('button[data-action="add-point"]').addEventListener('click', function() {
-            peaksInstance.points.add({
-              time: peaksInstance.player.getCurrentTime(),
-              labelText: 'Test point',
-              editable: true
-            });
-          });
-
-          document.querySelector('button[data-action="log-data"]').addEventListener('click', function(event) {
-            renderSegments(peaksInstance);
-            renderPoints(peaksInstance);
-          });
-
-          document.querySelector('button[data-action="seek"]').addEventListener('click', function(event) {
-            var time = document.getElementById('seek-time').value;
-            var seconds = parseFloat(time);
-
-            if (!Number.isNaN(seconds)) {
-              peaksInstance.player.seek(seconds);
-            }
-          });
-
-          document.querySelector('button[data-action="destroy"]').addEventListener('click', function(event) {
-            peaksInstance.destroy();
-          });
-
-          document.getElementById('auto-scroll').addEventListener('change', function(event) {
-            var view = peaksInstance.views.getView('zoomview');
-            view.enableAutoScroll(event.target.checked);
-          });
-
-          document.querySelector('body').addEventListener('click', function(event) {
-            var element = event.target;
-            var action  = element.getAttribute('data-action');
-            var id      = element.getAttribute('data-id');
-
-            if (action === 'play-segment') {
-              var segment = peaksInstance.segments.getSegment(id);
-              peaksInstance.player.playSegment(segment);
-            }
-            else if (action === 'loop-segment') {
-              var segment = peaksInstance.segments.getSegment(id);
-              peaksInstance.player.playSegment(segment, true);
-            }
-            else if (action === 'remove-point') {
-              peaksInstance.points.removeById(id);
-            }
-            else if (action === 'remove-segment') {
-              peaksInstance.segments.removeById(id);
-            }
-          });
-
-          var amplitudeScales = {
-            "0": 0.0,
-            "1": 0.1,
-            "2": 0.25,
-            "3": 0.5,
-            "4": 0.75,
-            "5": 1.0,
-            "6": 1.5,
-            "7": 2.0,
-            "8": 3.0,
-            "9": 4.0,
-            "10": 5.0
-          };
-
-          document.getElementById('amplitude-scale').addEventListener('input', function(event) {
-            var scale = amplitudeScales[event.target.value];
-
-            peaksInstance.views.getView('zoomview').setAmplitudeScale(scale);
-            peaksInstance.views.getView('overview').setAmplitudeScale(scale);
-          });
-
-          document.querySelector('button[data-action="resize"]').addEventListener('click', function(event) {
-            var zoomviewContainer = document.getElementById('zoomview-container');
-            var overviewContainer = document.getElementById('overview-container');
-
-            var zoomviewStyle = zoomviewContainer.offsetHeight === 200 ? 'height:300px' : 'height:200px';
-            var overviewStyle = overviewContainer.offsetHeight === 85  ? 'height:200px' : 'height:85px';
-
-            zoomviewContainer.setAttribute('style', zoomviewStyle);
-            overviewContainer.setAttribute('style', overviewStyle);
-
-            var zoomview = peaksInstance.views.getView('zoomview');
-            if (zoomview) {
-              zoomview.fitToContainer();
-            }
-
-            var overview = peaksInstance.views.getView('overview');
-            if (overview) {
-              overview.fitToContainer();
-            }
-          });
-
-          document.querySelector('button[data-action="toggle-zoomview"]').addEventListener('click', function(event) {
-            var container = document.getElementById('zoomview-container');
-            var zoomview = peaksInstance.views.getView('zoomview');
-
-            if (zoomview) {
-              peaksInstance.views.destroyZoomview();
-              container.style.display = 'none';
-            }
-            else {
-              container.style.display = 'block';
-              peaksInstance.views.createZoomview(container);
-            }
-          });
-
-          document.querySelector('button[data-action="toggle-overview"]').addEventListener('click', function(event) {
-            var container = document.getElementById('overview-container');
-            var overview = peaksInstance.views.getView('overview');
-
-            if (overview) {
-              peaksInstance.views.destroyOverview();
-              container.style.display = 'none';
-            }
-            else {
-              container.style.display = 'block';
-              peaksInstance.views.createOverview(container);
-            }
-          });
-
-          // Points mouse events
-
-          peaksInstance.on('points.mouseenter', function(point) {
-            console.log('points.mouseenter:', point);
-          });
-
-          peaksInstance.on('points.mouseleave', function(point) {
-            console.log('points.mouseleave:', point);
-          });
-
-          peaksInstance.on('points.dblclick', function(point) {
-            console.log('points.dblclick:', point);
-          });
-
-          peaksInstance.on('points.dragstart', function(point) {
-            console.log('points.dragstart:', point);
-          });
-
-          peaksInstance.on('points.dragmove', function(point) {
-            console.log('points.dragmove:', point);
-          });
-
-          peaksInstance.on('points.dragend', function(point) {
-            console.log('points.dragend:', point);
-          });
-
-          // Segments mouse events
-
-          peaksInstance.on('segments.dragstart', function(segment, startMarker) {
-            console.log('segments.dragstart:', segment, startMarker);
-          });
-
-          peaksInstance.on('segments.dragend', function(segment, startMarker) {
-            console.log('segments.dragend:', segment, startMarker);
-          });
-
-          peaksInstance.on('segments.dragged', function(segment, startMarker) {
-            console.log('segments.dragged:', segment, startMarker);
-          });
-
-          peaksInstance.on('segments.mouseenter', function(segment) {
-            console.log('segments.mouseenter:', segment);
-          });
-
-          peaksInstance.on('segments.mouseleave', function(segment) {
-            console.log('segments.mouseleave:', segment);
-          });
-
-          peaksInstance.on('segments.click', function(segment) {
-            console.log('segments.click:', segment);
-          });
-
-          peaksInstance.on('zoomview.dblclick', function(time) {
-            console.log('zoomview.dblclick:', time);
-          });
-
-          peaksInstance.on('overview.dblclick', function(time) {
-            console.log('overview.dblclick:', time);
-          });
-
-          peaksInstance.on('player.seeked', function(time) {
-            console.log('player.seeked:', time);
-          });
-
-          peaksInstance.on('player.play', function(time) {
-            console.log('player.play:', time);
-          });
-
-          peaksInstance.on('player.pause', function(time) {
-            console.log('player.pause:', time);
-          });
-
-          peaksInstance.on('player.ended', function() {
-            console.log('player.ended');
-          });
-        });
-      })(peaks);
+      var options = {
+        dataUri: {
+          arraybuffer: '<?=$wf_dat_file?>',
+        }
+      };
+
+      var request = new XMLHttpRequest();
+      request.open('GET', 'api/read.php?file=<?=urlencode($file)?>', false);
+      request.send(null);
+
+      if (request.status === 200) {
+        console.log(request.responseText);
+        var serverData = JSON.parse(request.responseText);
+        Object.assign(options, serverData);
+      }
     </script>
+    <script src="main.js"></script>
   </body>
 </html>
