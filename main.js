@@ -12,6 +12,37 @@
     zoomLevels: [ 256, 512, 1024, 2048, 4096],
   })
 
+  var save = function(peaksInstance) {
+    // console.log(points.map(p => ({startTime: p.startTime} = p))); // TODO save
+
+    var data = {
+      points: peaksInstance.points.getPoints().map(point => {
+        return {
+          time: point.time,
+          "editable": point.editable,
+          "color": point.color,
+          "labelText": point.labelText
+        }
+      }),
+      segments: peaksInstance.segments.getSegments().map(segment => {
+        return {
+          startTime: segment.startTime,
+          endTime: segment.endTime,
+          "editable": segment.editable,
+          "color": segment.color,
+          "labelText": segment.labelText
+        }
+      })
+    };
+
+    fetch('api/update.php?file=' + encodeURIComponent(FILE), {
+      method: 'post',
+      body: JSON.stringify(data)
+    }).then(data => {
+      console.log(data);
+    });
+  }
+
   var renderSegments = function(peaks) {
     var segmentsContainer = document.getElementById('segments');
     var segments = peaks.segments.getSegments();
@@ -61,6 +92,7 @@
           }
 
           segment.update({ startTime: startTime });
+          save(peaks);
         }
       });
     });
@@ -85,6 +117,7 @@
           }
 
           segment.update({ endTime: endTime });
+          save(peaks);
         }
       });
     });
@@ -98,6 +131,7 @@
 
         if (segment) {
           segment.update({ labelText: labelText });
+          save(peaks);
         }
       });
     });
@@ -143,6 +177,7 @@
           }
 
           point.update({ time: time });
+          save(peaks);
         }
       });
     });
@@ -152,14 +187,20 @@
         var element = event.target;
         var id = element.getAttribute('data-id');
         var point = peaks.points.getPoint(id);
-        var labelText = element.labelText;
-
+        var labelText = element.value;
         if (point) {
           point.update({ labelText: labelText });
+          save(peaks);
         }
       });
     });
   };
+
+  var renderAndSave = function(peaks) {
+    renderPoints(peaks);
+    renderSegments(peaks);
+    save(peaks);
+  }
 
   Peaks.init(options, function(err, peaksInstance) {
     if (err) {
@@ -175,6 +216,9 @@
     const view = peaksInstance.views.getView('overview');
     view.enableMarkerEditing(true);
 
+    peaksInstance.zoom.setZoom(4);
+
+
     console.log("Peaks instance ready");
 
     document.querySelector('[data-action="zoom-in"]').addEventListener('click', function() {
@@ -188,24 +232,28 @@
     var segmentCounter = 1;
 
     document.querySelector('button[data-action="add-segment"]').addEventListener('click', function() {
-      peaksInstance.segments.add({
-        startTime: peaksInstance.player.getCurrentTime(),
-        endTime: peaksInstance.player.getCurrentTime() + 40,
-        labelText: 'Test segment ' + segmentCounter++,
-        editable: true
-      });
-      renderSegments(peaksInstance);
-      renderPoints(peaksInstance);
+      var labelText = prompt("Enter segment label");
+      if (labelText) {
+        peaksInstance.segments.add({
+          startTime: peaksInstance.player.getCurrentTime(),
+          endTime: peaksInstance.player.getCurrentTime() + 100,
+          labelText: labelText,
+          editable: true
+        });
+        renderAndSave(peaksInstance);
+      }
     });
 
     document.querySelector('button[data-action="add-point"]').addEventListener('click', function() {
-      peaksInstance.points.add({
-        time: peaksInstance.player.getCurrentTime(),
-        labelText: 'Test point',
-        editable: true
-      });
-      renderSegments(peaksInstance);
-      renderPoints(peaksInstance);
+      var labelText = prompt("Enter point label");
+      if (labelText) {
+        peaksInstance.points.add({
+          time: peaksInstance.player.getCurrentTime(),
+          labelText: labelText,
+          editable: true
+        });
+        renderAndSave(peaksInstance);
+      }
     });
 
     document.querySelector('button[data-action="log-data"]').addEventListener('click', function(event) {
@@ -232,8 +280,7 @@
     });
 
     document.querySelector('button[data-action="save"]').addEventListener('click', function(event) {
-      var points = peaksInstance.points.getPoints();
-      console.log(points.map(p => ({startTime: p.startTime} = p))); // TODO save
+      save(peaksInstance);
     });
 
     document.querySelector('body').addEventListener('click', function(event) {
@@ -249,11 +296,13 @@
         var segment = peaksInstance.segments.getSegment(id);
         peaksInstance.player.playSegment(segment, true);
       }
-      else if (action === 'remove-point') {
+      else if (action === 'remove-point' && confirm("Are you sure?")) {
         peaksInstance.points.removeById(id);
+        renderAndSave(peaksInstance);
       }
-      else if (action === 'remove-segment') {
+      else if (action === 'remove-segment' && confirm("Are you sure?")) {
         peaksInstance.segments.removeById(id);
+        renderAndSave(peaksInstance);
       }
     });
 
@@ -327,6 +376,9 @@
       }
     });
 
+    renderSegments(peaksInstance);
+    renderPoints(peaksInstance);
+
     // Points mouse events
 
     peaksInstance.on('points.mouseenter', function(point) {
@@ -351,6 +403,7 @@
 
     peaksInstance.on('points.dragend', function(point) {
       console.log('points.dragend:', point);
+      renderAndSave(peaksInstance);
     });
 
     // Segments mouse events
@@ -361,6 +414,7 @@
 
     peaksInstance.on('segments.dragend', function(segment, startMarker) {
       console.log('segments.dragend:', segment, startMarker);
+      renderAndSave(peaksInstance);
     });
 
     peaksInstance.on('segments.dragged', function(segment, startMarker) {

@@ -1,6 +1,9 @@
 body {
   font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
 }
+h1 {
+  margin-bottom: 40px;
+}
 
 .container {
   max-width: 1200px;
@@ -30,7 +33,7 @@ body {
 
 #demo-controls {
   margin: 0 auto 24px auto;
-  width: 1000px;
+
   display: flex;
   align-items: center;
 }
@@ -55,8 +58,8 @@ body {
 }
 
 .log {
-  margin: 0 auto 24px auto;
-  width: 1000px;
+  /* margin: 0 auto 24px auto; */
+  /* width: 1000px; */
 }
 
 table {

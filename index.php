@@ -1,10 +1,11 @@
 <?php
 // php -S localhost:8000
-$is_localhost = $_SERVER["REMOTE_ADDR"] == "::1";
-$media_dir = $is_localhost ? "media/2021" : realpath(__DIR__."/../transit");
-$file = $_GET["file"] ;
-$wf_dat_file = "$file.dat";
-$wf_json_file = "$file.json";
+include "config.php";
+
+$file = $_GET["file"];
+$file_web_path = $media_relative_path . trim($file, '/');
+$wf_dat_file = "$file_web_path.dat";
+$wf_json_file = "$file_web_path.json";
 
 if (!isset($_GET["file"])) {
 
@@ -13,13 +14,17 @@ if (!isset($_GET["file"])) {
   <?
 
   function iterateDirectory($i) {
+      global $media_dir;
       echo '<ul>';
       foreach ($i as $path) {
-          $relative_path = str_replace("/home/rcaceres/sites/net.rchrd.dev/web", "", $path);
           if ($path->isDir()) {
               iterateDirectory($path);
           } else {
             if (file_exists("$path.dat")) {
+              $relative_path = str_replace($media_dir, "", $path);
+              // echo $media_dir . "<BR>";
+              // echo $path . "<BR>";
+              // echo $relative_path . "<BR>";
               echo "<li><a href='?file=".urlencode($relative_path)."'>$relative_path</a></li>";
             }
           }
@@ -61,7 +66,7 @@ if (!isset($_GET["file"])) {
 
       <div id="demo-controls">
         <audio id="audio" controls="controls">
-          <source src="<?=$file?>" type="audio/mpeg">
+          <source src="<?=$file_web_path?>" type="audio/mpeg">
           Your browser does not support the audio element.
         </audio>
 
@@ -122,9 +127,10 @@ if (!isset($_GET["file"])) {
     </div>
     <script src="peaks.js"></script>
     <script>
+      const FILE = <?=json_encode($file);?>;
       var options = {
         dataUri: {
-          arraybuffer: '<?=$wf_dat_file?>',
+          arraybuffer: <?=json_encode($wf_dat_file)?>,
         }
       };
 
