@@ -10,6 +10,11 @@ h1 {
   margin-left: auto;
   margin-right: auto;
 }
+
+.hover-cursor {
+  cursor: pointer;
+}
+
 #titles, #waveform-container {
   margin: 24px auto;
   width: 100%;
@@ -53,6 +58,10 @@ h1 {
   margin-left: 1em;
 }
 
+#segments {
+  margin-top: 32px;
+}
+
 #seek-time {
   width: 4em;
 }
@@ -76,4 +85,24 @@ table th, table td {
 
 .hide {
   display: none;
+}
+
+.comment-helper-button {
+  margin-left: 10px;
+  float: right;
+}
+
+ul#points-container {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+#points-container li {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px;
+  max-width: 600px;
+}
+#points-container li + li {
+  margin-top: 8px;
 }

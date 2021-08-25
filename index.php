@@ -73,9 +73,7 @@ if (!isset($_GET["file"])) {
         <div id="controls">
           <button data-action="zoom-in">Zoom in</button>
           <button data-action="zoom-out">Zoom out</button>
-          <button data-action="add-segment">Add a Segment at current time</button>
-          <button data-action="add-point">Add a Point at current time</button>
-          <button data-action="log-data">Log segments/points</button>
+          <button class="hide" data-action="log-data">Log segments/points</button>
           <input class="hide" type="text" id="seek-time" value="0.0">
           <button class="hide" data-action="seek">Seek</button>
           <label class="hide" for="amplitude-scale">Amplitude scale</label>
@@ -86,11 +84,25 @@ if (!isset($_GET["file"])) {
           <button class="hide" data-action="toggle-zoomview">Show/hide zoomable waveform</button>
           <button class="hide" data-action="toggle-overview">Show/hide overview waveform</button>
           <button class="hide" data-action="destroy">Destroy</button>
-          <button class="hide2" data-action="save">Save</button>
+          <button class="hide" data-action="save">Save</button>
         </div>
       </div>
 
+      <div>
+          <button data-action="add-point">Add a Comment at current time</button>
+
+                  <button data-action="add-segment">Add a Segment at current time</button>
+      </div>
+
       <div class="log">
+
+        <div id="points" class="hide">
+          <h2>Comments</h2>
+          <ul id="points-container">
+          </ul>
+        </div>
+      </div>
+
         <div id="segments" class="hide">
           <h2>Segments</h2>
           <table>
@@ -107,22 +119,6 @@ if (!isset($_GET["file"])) {
             </tbody>
           </table>
         </div>
-
-        <div id="points" class="hide">
-          <h2>Points</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Label</th>
-                <th>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div>
-      </div>
 
     </div>
     <script src="peaks.js"></script>

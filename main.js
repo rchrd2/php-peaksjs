@@ -1,3 +1,68 @@
+function oneOf() {
+  for (var i = 0; i < arguments.length; i++) {
+    if (arguments[i]) return arguments[i];
+  }
+  return '';
+};
+
+function isFunction(obj) {
+  return !!(obj && obj.constructor && obj.call && obj.apply);
+}
+
+function isElement(element) {
+    return element instanceof Element || element instanceof HTMLDocument;
+}
+
+/**
+ * @param {string} type
+ * @param {function} handler(el)
+ * @param remaining args are children
+ * @returns {object} DOM element
+ */
+function el(typeAndClassName, handler) {
+  var argOffset = 2;
+  var parts = typeAndClassName.split(' ');
+  var el = document.createElement(parts[0]);
+  if (parts.length > 1) el.className = parts.slice(1).join(' '); // className
+  if (isFunction(handler)) handler.call(el);
+  else argOffset--;
+
+  var append = function (el, v) {
+    console.log(v);
+    if (!isElement(v)) {
+      el.appendChild(document.createTextNode(String(v)));
+    } else {
+      el.appendChild(v);
+    }
+  }
+
+  // Append *args to created el
+  for (var i = argOffset; i < arguments.length; i++) {
+    if (arguments[i] instanceof Array) {
+      for (var j = 0; j < arguments[i].length; j++)
+        append(el, arguments[i][j]);
+    } else {
+      append(el, arguments[i]);
+    }
+  }
+  return el;
+}
+
+function formatSecondsAsTime(secs, format) {
+  var hr  = Math.floor(secs / 3600);
+  var min = Math.floor((secs - (hr * 3600))/60);
+  var sec = Math.floor(secs - (hr * 3600) -  (min * 60));
+
+  if (min < 10){
+    min = "0" + min;
+  }
+  if (sec < 10){
+    sec  = "0" + sec;
+  }
+
+  return min + ':' + sec;
+}
+
 (function(Peaks) {
   Object.assign(options, {
     containers: {
@@ -52,6 +117,7 @@
 
     for (var i = 0; i < segments.length; i++) {
       var segment = segments[i];
+
 
       var row = '<tr>' +
         '<td>' + segment.id + '</td>' +
@@ -139,26 +205,67 @@
 
   var renderPoints = function(peaks) {
     var pointsContainer = document.getElementById('points');
+    var pointsInnerContainer = document.getElementById('points-container');
     var points = peaks.points.getPoints();
     console.log(points);
-    var html = '';
+
+    var elements = [];
 
     for (var i = 0; i < points.length; i++) {
-      var point = points[i];
+      let point = points[i];
+      elements.push(
+        el('li hover-cursor', function() {
+            this.onclick = function() {
+              console.log(`seeking ${point.time}`);
+              peaks.player.seek(point.time);
+            }
+            this.oncontextmenu = function(e) {
+              e.preventDefault();
+              alert('Coming soon... editing');
+            }
+            this.setAttribute('data-id', point.id);
+          },
+          // el('td', point.id),
+          el('span', formatSecondsAsTime(point.time)),
+          el('span', ` - ${point.labelText}`),
+          el('button comment-helper-button', function() {
+            this.onclick = function(e) {
+              if (confirm("Would you like to edit this comment?")) {
+                var newValue = prompt("Edit the comment.", point.labelText);
+                if (newValue && newValue != point.labelText) {
+                  point.update({ labelText: newValue });
+                  renderAndSave(peaks);
+                }
+              }
+            };
+          }, `Edit`),
+          el('button comment-helper-button', function() {
+            this.onclick = function(e) {
+              if (confirm("Would you like to delete this comment?")) {
+                peaks.points.removeById(point.id);
+                renderAndSave(peaks);
+              }
+            };
+          }, `Delete`)
+        )
+      );
 
-      var row = '<tr>' +
-        '<td>' + point.id + '</td>' +
-        '<td><input data-action="update-point-label" type="text" value="' + point.labelText + '" data-id="' + point.id + '"/></td>' +
-        '<td><input data-action="update-point-time" type="number" value="' + point.time + '" data-id="' + point.id + '"/></td>' +
-        '<td>' + '<a href="#' + point.id + '" data-action="remove-point" data-id="' + point.id + '">Remove</a>' + '</td>' +
-        '</tr>';
+      // var row = '<tr>' +
+      //   '<td>' + point.id + '</td>' +
+      //   '<td><input data-action="update-point-label" type="text" value="' + point.labelText + '" data-id="' + point.id + '"/></td>' +
+      //   '<td><input data-action="update-point-time" type="number" value="' + point.time + '" data-id="' + point.id + '"/></td>' +
+      //   '<td>' + '<a href="#' + point.id + '" data-action="remove-point" data-id="' + point.id + '">Remove</a>' + '</td>' +
+      //   '</tr>';
 
-      html += row;
+
+
+      // html += row;
     }
 
-    pointsContainer.querySelector('tbody').innerHTML = html;
+    pointsInnerContainer.innerHTML = '';
+    elements.map((v, i) => pointsInnerContainer.appendChild(v))
 
-    if (html.length) {
+    if (points.length) {
       pointsContainer.classList.remove('hide');
     }
 
