@@ -50,19 +50,18 @@ if (!isset($_GET["file"])) {
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title><?=$file?></title>
     <link rel="stylesheet" href="main.css" />
   </head>
   <body>
-    <div class="container">
-      <div>
-        <h1><?=$file?></h1>
-      </div>
-
       <div id="waveform-container">
+
         <div id="overview-container"></div>
         <div id="zoomview-container"></div>
+
       </div>
+    <div class="container">
 
       <div id="demo-controls">
         <audio id="audio" controls="controls">
@@ -71,8 +70,8 @@ if (!isset($_GET["file"])) {
         </audio>
 
         <div id="controls">
-          <button data-action="zoom-in">Zoom in</button>
-          <button data-action="zoom-out">Zoom out</button>
+                  <button class="hide" data-action="zoom-in">Zoom in</button>
+          <button class="hide" data-action="zoom-out">Zoom out</button>
           <button class="hide" data-action="log-data">Log segments/points</button>
           <input class="hide" type="text" id="seek-time" value="0.0">
           <button class="hide" data-action="seek">Seek</button>
@@ -89,9 +88,16 @@ if (!isset($_GET["file"])) {
       </div>
 
       <div>
-          <button data-action="add-point">Add a Comment at current time</button>
+        <h1><?=$file?></h1>
+      </div>
 
-                  <button data-action="add-segment">Add a Segment at current time</button>
+      <div id="comment-form">
+        <textarea id="comment-textarea" placeholder="Add a comment"></textarea>
+        <div class="comment-form-bottom">
+          <label>Add comment at current time <input id="include-time-field" type="checkbox" name="current-time" checked /></label>
+          <button data-action="add-point">Add Comment</button>
+          <button class="hide" data-action="add-segment">Add a Segment at current time</button>
+        </div>
       </div>
 
       <div class="log">

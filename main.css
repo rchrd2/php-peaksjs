@@ -1,31 +1,45 @@
+:root {
+  --comments-width: 650px;
+  --border-color-1: #ccc;
+}
+
 body {
   font-family: 'Helvetica neue', Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0 0 50px 0;
 }
 h1 {
   margin-bottom: 40px;
+  word-break: break-all;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 1.2;
 }
 
 .container {
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  padding: 0 15px;
 }
 
 .hover-cursor {
   cursor: pointer;
 }
 
-#titles, #waveform-container {
-  margin: 24px auto;
-  width: 100%;
+#waveform-container {
+  background: white;
+  /* border-bottom: 1px solid var(--border-color-1); */
+  padding: 15px;
+  box-sizing: border-box;
 }
-
 #zoomview-container, #overview-container {
   margin: 0 0 24px 0;
   line-height: 0;
-  -moz-box-shadow: 1px 1px 20px #919191;
-  -webkit-box-shadow: 1px 1px 20px #919191;
-  box-shadow: 1px 1px 20px #919191;
+  -moz-box-shadow: 1px 1px 20px var(--border-color-1);;
+  -webkit-box-shadow: 1px 1px 20px var(--border-color-1);;
+  box-shadow: 1px 1px 20px var(--border-color-1);;
+  /* border: 1px solid var(--border-color-1); */
 }
 
 #zoomview-container {
@@ -38,9 +52,9 @@ h1 {
 
 #demo-controls {
   margin: 0 auto 24px auto;
-
   display: flex;
   align-items: center;
+  /* border-bottom: 1px solid var(--border-color-1); */
 }
 
 #demo-controls button {
@@ -66,21 +80,23 @@ h1 {
   width: 4em;
 }
 
+#comment-form {
+  max-width: var(--comments-width);
+}
+#comment-textarea {
+  display: block;
+  border: 1px solid var(--border-color-1);
+  width: 100%;
+  resize: none;
+  height: 50px;
+}
+.comment-form-bottom {
+  text-align: right;
+}
+
 .log {
   /* margin: 0 auto 24px auto; */
   /* width: 1000px; */
-}
-
-table {
-  width: 100%;
-}
-
-table th {
-  text-align: left;
-}
-
-table th, table td {
-  padding: 0.5em;
 }
 
 .hide {
@@ -96,12 +112,17 @@ ul#points-container {
   list-style-type: none;
   padding: 0;
   margin: 0;
+  max-width: var(--comments-width);
 }
 #points-container li {
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
-  max-width: 600px;
+  display: flex;
+  flex-direction: row;
+}
+#points-container li > span.comment-text {
+  flex: 1;
 }
 #points-container li + li {
   margin-top: 8px;
