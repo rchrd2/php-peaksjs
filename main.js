@@ -107,18 +107,16 @@ function formatSecondsAsTime(secs, format) {
     var data = {
       points: peaksInstance.points.getPoints().map((point) => {
         return {
+          id: point.id,
           time: point.time,
-          editable: false,
-          color: point.color,
           labelText: point.labelText,
         };
       }),
       segments: peaksInstance.segments.getSegments().map((segment) => {
         return {
+          id: segment.id,
           startTime: segment.startTime,
           endTime: segment.endTime,
-          editable: segment.editable,
-          color: segment.color,
           labelText: segment.labelText,
         };
       }),
@@ -295,31 +293,31 @@ function formatSecondsAsTime(secs, format) {
             el("span", ` - ${point.labelText}`)
           ),
 
-          el(
-            "button comment-helper-button",
-            function () {
-              this.onclick = function (e) {
-                var newValue = prompt("Edit the comment.", point.labelText);
-                if (newValue && newValue != point.labelText) {
-                  point.update({ labelText: newValue });
-                  renderAndSave(peaks);
-                }
-              };
-            },
-            `Edit`
-          ),
-          el(
-            "button comment-helper-button",
-            function () {
-              this.onclick = function (e) {
-                if (confirm("Would you like to delete this comment?")) {
-                  peaks.points.removeById(point.id);
-                  renderAndSave(peaks);
-                }
-              };
-            },
-            `Delete`
-          )
+          // el(
+          //   "button comment-helper-button",
+          //   function () {
+          //     this.onclick = function (e) {
+          //       var newValue = prompt("Edit the comment.", point.labelText);
+          //       if (newValue && newValue != point.labelText) {
+          //         point.update({ labelText: newValue });
+          //         renderAndSave(peaks);
+          //       }
+          //     };
+          //   },
+          //   `Edit`
+          // ),
+          // el(
+          //   "button comment-helper-button",
+          //   function () {
+          //     this.onclick = function (e) {
+          //       if (confirm("Would you like to delete this comment?")) {
+          //         peaks.points.removeById(point.id);
+          //         renderAndSave(peaks);
+          //       }
+          //     };
+          //   },
+          //   `Delete`
+          // )
         )
       );
     }
@@ -437,9 +435,10 @@ function formatSecondsAsTime(secs, format) {
         if (labelText) {
           commentField.value = "";
           peaksInstance.points.add({
+            id: String(+(new Date())),
             time: includeTimeField.checked ? time : 0,
             labelText: labelText,
-            editable: true,
+            editable: false,
           });
           renderAndSave(peaksInstance);
         }

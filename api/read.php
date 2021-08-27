@@ -11,7 +11,8 @@ if (!isset($file)) {
 $full_path = $media_dir . '/' . $file;
 
 if (!file_exists($full_path)) {
-  exit_error("file does not exist: $full_path");
+  echo '{}';
+  exit;
 }
 
 $metadata_path = $full_path . '.json';
