@@ -1,0 +1,20 @@
+name: Deploy to production
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - uses: easingthemes/ssh-deploy@v2.2.11
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-av --checksum"
+          REMOTE_HOST: "dev.rchrd.net"
+          REMOTE_USER: "rcaceres"
+          TARGET: "/home/rcaceres/sites/net.rchrd.dev/web/audio"
+          EXCLUDE: "data, .git*, .htpasswd"
