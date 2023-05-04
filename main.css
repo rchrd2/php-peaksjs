@@ -10,6 +10,7 @@ body {
   margin: 0;
   padding: 0 0 50px 0;
 }
+
 h1 {
   margin-bottom: 40px;
   word-break: break-all;
@@ -38,12 +39,17 @@ h1 {
   margin-left: auto;
   margin-right: auto;
 }
-#zoomview-container, #overview-container {
+
+#zoomview-container,
+#overview-container {
   margin: 0 0 24px 0;
   line-height: 0;
-  -moz-box-shadow: 1px 1px 20px var(--border-color-1);;
-  -webkit-box-shadow: 1px 1px 20px var(--border-color-1);;
-  box-shadow: 1px 1px 20px var(--border-color-1);;
+  -moz-box-shadow: 1px 1px 20px var(--border-color-1);
+  ;
+  -webkit-box-shadow: 1px 1px 20px var(--border-color-1);
+  ;
+  box-shadow: 1px 1px 20px var(--border-color-1);
+  ;
   /* border: 1px solid var(--border-color-1); */
 }
 
@@ -88,6 +94,7 @@ h1 {
 #comment-form {
   max-width: var(--comments-width);
 }
+
 #comment-textarea {
   display: block;
   border: 1px solid var(--border-color-1);
@@ -95,6 +102,7 @@ h1 {
   resize: none;
   height: 50px;
 }
+
 .comment-form-bottom {
   text-align: right;
 }
@@ -119,6 +127,7 @@ ul#points-container {
   margin: 0;
   max-width: var(--comments-width);
 }
+
 .comment-row {
   border: 1px solid #ccc;
   border-radius: 8px;
@@ -126,12 +135,19 @@ ul#points-container {
   display: flex;
   flex-direction: row;
 }
+
 .comment-row:hover {
   border: 1px solid blue;
 }
-.comment-row > span.comment-text {
+
+.comment-row>span.comment-text {
   flex: 1;
 }
-.comment-row + .comment-row {
+
+.comment-time {
+  text-decoration: underline;
+}
+
+.comment-row+.comment-row {
   margin-top: 8px;
 }

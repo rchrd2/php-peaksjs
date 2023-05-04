@@ -57,7 +57,7 @@ function formatSecondsAsTime(secs, format) {
   if (sec < 10) {
     sec = "0" + sec;
   }
-  return min + ":" + sec;
+  return hr + ":" + min + ":" + sec;
 }
 
 (function (Peaks) {
@@ -266,7 +266,9 @@ function formatSecondsAsTime(secs, format) {
   var renderPoints = function (peaks) {
     var pointsContainer = document.getElementById("points");
     var pointsInnerContainer = document.getElementById("points-container");
-    var points = peaks.points.getPoints().sort(function(a, b) { return a.time > b.time});
+    var points = peaks.points.getPoints().sort(function (a, b) {
+      return a.time > b.time;
+    });
     console.log(points);
 
     var elements = [];
@@ -289,9 +291,9 @@ function formatSecondsAsTime(secs, format) {
               };
               this.setAttribute("data-id", point.id);
             },
-            el("span", formatSecondsAsTime(point.time)),
+            el("span comment-time", formatSecondsAsTime(point.time)),
             el("span", ` - ${point.labelText}`)
-          ),
+          )
 
           // el(
           //   "button comment-helper-button",
@@ -435,7 +437,7 @@ function formatSecondsAsTime(secs, format) {
         if (labelText) {
           commentField.value = "";
           peaksInstance.points.add({
-            id: String(+(new Date())),
+            id: String(+new Date()),
             time: includeTimeField.checked ? time : 0,
             labelText: labelText,
             editable: false,
