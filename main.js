@@ -266,7 +266,7 @@ function formatSecondsAsTime(secs, format) {
   var renderPoints = function (peaks) {
     var pointsContainer = document.getElementById("points");
     var pointsInnerContainer = document.getElementById("points-container");
-    var points = peaks.points.getPoints();
+    var points = peaks.points.getPoints().sort(function(a, b) { return a.time > b.time});
     console.log(points);
 
     var elements = [];
@@ -275,7 +275,7 @@ function formatSecondsAsTime(secs, format) {
       let point = points[i];
       elements.push(
         el(
-          "li hover-cursor",
+          "li comment-row hover-cursor",
           el(
             "span comment-text",
             function () {

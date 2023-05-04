@@ -1,6 +1,8 @@
 :root {
+  --container-width: 1200px;
   --comments-width: 650px;
   --border-color-1: #ccc;
+
 }
 
 body {
@@ -31,7 +33,10 @@ h1 {
   background: white;
   /* border-bottom: 1px solid var(--border-color-1); */
   padding: 15px;
-  box-sizing: border-box;
+  /* box-sizing: border-box; */
+  max-width: var(--container-width);
+  margin-left: auto;
+  margin-right: auto;
 }
 #zoomview-container, #overview-container {
   margin: 0 0 24px 0;
@@ -114,16 +119,19 @@ ul#points-container {
   margin: 0;
   max-width: var(--comments-width);
 }
-#points-container li {
+.comment-row {
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 8px;
   display: flex;
   flex-direction: row;
 }
-#points-container li > span.comment-text {
+.comment-row:hover {
+  border: 1px solid blue;
+}
+.comment-row > span.comment-text {
   flex: 1;
 }
-#points-container li + li {
+.comment-row + .comment-row {
   margin-top: 8px;
 }
