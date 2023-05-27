@@ -130,6 +130,14 @@ function formatSecondsAsTime(secs, format) {
     });
   };
 
+  var sendDeleteToApi = function (peaksInstance, id) {
+    fetch(`api/update.php?file=${encodeURIComponent(FILE)}&id=${id}`, {
+      method: "post",
+    }).then((data) => {
+      console.log(data);
+    });
+  };
+
   var renderSegments = function (peaks) {
     var segmentsContainer = document.getElementById("segments");
     var segments = peaks.segments.getSegments();
@@ -289,8 +297,7 @@ function formatSecondsAsTime(secs, format) {
                 e.preventDefault();
                 // alert("Coming soon... editing");
                 if (confirm("Would you like to delete this comment?")) {
-                  peaks.points.removeById(point.id);
-                  renderAndSave(peaks);
+                  renderAndDeleteById(peaks, point.id);
                 }
               };
               this.setAttribute("data-id", point.id);
@@ -377,6 +384,11 @@ function formatSecondsAsTime(secs, format) {
     renderPoints(peaks);
     renderSegments(peaks);
     saveToApi(peaks);
+  };
+
+  var renderAndDeleteById = function (peaks, id) {
+    peaks.segments.removeById(id);
+    sendDeleteToApi(id);
   };
 
   Peaks.init(options, function (err, peaksInstance) {
