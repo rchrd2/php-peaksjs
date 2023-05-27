@@ -101,7 +101,7 @@ function formatSecondsAsTime(secs, format) {
     // playedWaveformColor: "rgba(0, 225, 128, 1)",
   });
 
-  var save = function (peaksInstance) {
+  var saveToApi = function (peaksInstance) {
     // console.log(points.map(p => ({startTime: p.startTime} = p))); // TODO save
 
     var data = {
@@ -214,7 +214,7 @@ function formatSecondsAsTime(secs, format) {
             }
 
             segment.update({ startTime: startTime });
-            save(peaks);
+            saveToApi(peaks);
           }
         });
       });
@@ -241,7 +241,7 @@ function formatSecondsAsTime(secs, format) {
             }
 
             segment.update({ endTime: endTime });
-            save(peaks);
+            saveToApi(peaks);
           }
         });
       });
@@ -257,7 +257,7 @@ function formatSecondsAsTime(secs, format) {
 
           if (segment) {
             segment.update({ labelText: labelText });
-            save(peaks);
+            saveToApi(peaks);
           }
         });
       });
@@ -287,7 +287,11 @@ function formatSecondsAsTime(secs, format) {
               };
               this.oncontextmenu = function (e) {
                 e.preventDefault();
-                alert("Coming soon... editing");
+                // alert("Coming soon... editing");
+                if (confirm("Would you like to delete this comment?")) {
+                  peaks.points.removeById(point.id);
+                  renderAndSave(peaks);
+                }
               };
               this.setAttribute("data-id", point.id);
             },
@@ -348,7 +352,7 @@ function formatSecondsAsTime(secs, format) {
             }
 
             point.update({ time: time });
-            save(peaks);
+            saveToApi(peaks);
           }
         });
       });
@@ -363,7 +367,7 @@ function formatSecondsAsTime(secs, format) {
           var labelText = element.value;
           if (point) {
             point.update({ labelText: labelText });
-            save(peaks);
+            saveToApi(peaks);
           }
         });
       });
@@ -372,7 +376,7 @@ function formatSecondsAsTime(secs, format) {
   var renderAndSave = function (peaks) {
     renderPoints(peaks);
     renderSegments(peaks);
-    save(peaks);
+    saveToApi(peaks);
   };
 
   Peaks.init(options, function (err, peaksInstance) {
@@ -480,7 +484,7 @@ function formatSecondsAsTime(secs, format) {
     document
       .querySelector('button[data-action="save"]')
       .addEventListener("click", function (event) {
-        save(peaksInstance);
+        saveToApi(peaksInstance);
       });
 
     document.querySelector("body").addEventListener("click", function (event) {

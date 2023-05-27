@@ -2,7 +2,8 @@
 include "../config.php";
 
 $id = 0;
-function add_ids(&$md) {
+function add_ids(&$md)
+{
   if (isset($md["points"])) {
     foreach ($md["points"] as &$point) {
       if (!isset($point["id"])) {
@@ -13,7 +14,8 @@ function add_ids(&$md) {
   }
 }
 
-function md_to_lookup($md) {
+function md_to_lookup($md)
+{
   $lookup = [];
   if (isset($md["points"])) {
     foreach ($md["points"] as &$point) {
@@ -25,7 +27,8 @@ function md_to_lookup($md) {
   return $lookup;
 }
 
-function merge_metadata($old_md, $new_md) {
+function merge_metadata($old_md, $new_md)
+{
   add_ids($old_md);
   $old_md_lookup = md_to_lookup($old_md);
   foreach ($new_md["points"] as $point) {
@@ -65,15 +68,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit_error("invalid json");
   }
 
-  $current_md = json_decode(file_get_contents($metadata_path), true);
-  $merged_md = merge_metadata($current_md, $request_data);
-
-  $fp = fopen($metadata_path, 'w');
-  fwrite($fp, json_encode($merged_md, true));
-  fclose($fp);
+  if (array_key_exists("delete_id", $_GET)) {
+    $delete_id = $_GET["delete_id"];
+    $current_md = json_decode(file_get_contents($metadata_path), true);
+    $new_points = [];
+    foreach ($current_md["points"] as $point) {
+      if ($point["id"] != $delete_id) {
+        array_push($new_points, $point);
+      }
+    }
+    $current_md["points"] = $new_points;
+    $fp = fopen($metadata_path, 'w');
+    fwrite($fp, json_encode($current_md, JSON_PRETTY_PRINT));
+    fclose($fp);
+  } else {
+    $current_md = json_decode(file_get_contents($metadata_path), true);
+    $merged_md = merge_metadata($current_md, $request_data);
+    $fp = fopen($metadata_path, 'w');
+    fwrite($fp, json_encode($merged_md, JSON_PRETTY_PRINT));
+    fclose($fp);
+  }
   echo file_get_contents($metadata_path);
 } else {
   exit_error("only POST allowed");
 }
-
-
