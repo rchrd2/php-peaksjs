@@ -130,7 +130,7 @@ function formatSecondsAsTime(secs, format) {
     });
   };
 
-  var sendDeleteToApi = function (peaksInstance, id) {
+  var sendDeleteToApi = function (id) {
     fetch(`api/update.php?file=${encodeURIComponent(FILE)}&id=${id}`, {
       method: "post",
     }).then((data) => {
