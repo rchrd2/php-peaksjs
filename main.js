@@ -131,7 +131,7 @@ function formatSecondsAsTime(secs, format) {
   };
 
   var sendDeleteToApi = function (id) {
-    fetch(`api/update.php?file=${encodeURIComponent(FILE)}&id=${id}`, {
+    fetch(`api/update.php?file=${encodeURIComponent(FILE)}&delete_id=${id}`, {
       method: "post",
     }).then((data) => {
       console.log(data);
@@ -388,6 +388,8 @@ function formatSecondsAsTime(secs, format) {
 
   var renderAndDeleteById = function (peaks, id) {
     peaks.segments.removeById(id);
+    renderPoints(peaks);
+    renderSegments(peaks);
     sendDeleteToApi(id);
   };
 
