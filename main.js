@@ -389,6 +389,7 @@ function formatSecondsAsTime(secs, format) {
   var renderAndDeleteById = function (peaks, id) {
     peaks.points.removeById(id);
     renderPoints(peaks);
+    renderSegments(peaks);
     sendDeleteToApi(id);
   };
 
