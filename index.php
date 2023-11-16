@@ -57,10 +57,8 @@ $wf_json_file = "$file_web_path.json";
 
 <body>
   <div id="waveform-container">
-
     <div id="overview-container"></div>
     <div id="zoomview-container"></div>
-
   </div>
   <div class="container">
 
@@ -74,7 +72,7 @@ $wf_json_file = "$file_web_path.json";
         <button class="hide" data-action="zoom-in">Zoom in</button>
         <button class="hide" data-action="zoom-out">Zoom out</button>
         <button class="hide" data-action="log-data">Log segments/points</button>
-        <input class="hide" type="text" id="seek-time" value="0.0">
+        <input class="hide" type="text" id="seek-time" value="15.0">
         <button class="hide" data-action="seek">Seek</button>
         <label class="hide" for="amplitude-scale">Amplitude scale</label>
         <input class="hide" type="range" id="amplitude-scale" min="0" max="10" step="1">
@@ -85,11 +83,14 @@ $wf_json_file = "$file_web_path.json";
         <button class="hide" data-action="toggle-overview">Show/hide overview waveform</button>
         <button class="hide" data-action="destroy">Destroy</button>
         <button class="hide" data-action="save">Save</button>
+        <button class="" data-action="seek-minus15">-15</button>
+        <button class="" data-action="seek-plus15">+15</button>
+
       </div>
     </div>
 
     <div>
-      <h1><?= $file ?></h1>
+      <h1><?= $file ?> <button role="link"><a target="_blank" href="<?= $file_web_path ?>">Download</a></button></h1>
     </div>
 
     <div id="comment-form">
@@ -102,7 +103,6 @@ $wf_json_file = "$file_web_path.json";
     </div>
 
     <div class="log">
-
       <div id="points" class="hide">
         <h2>Markers</h2>
         <ul id="points-container">

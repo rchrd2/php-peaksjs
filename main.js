@@ -1,3 +1,21 @@
+var amplitudeScales = {
+  0: 0.0,
+  1: 0.1,
+  2: 0.25,
+  3: 0.5,
+  4: 0.75,
+  5: 1.0,
+  6: 1.5,
+  7: 2.0,
+  8: 3.0,
+  9: 4.0,
+  10: 5.0,
+};
+
+var colorPallettes = {
+  protools: {},
+};
+
 function oneOf() {
   for (var i = 0; i < arguments.length; i++) {
     if (arguments[i]) return arguments[i];
@@ -60,6 +78,42 @@ function formatSecondsAsTime(secs, format) {
   return hr + ":" + min + ":" + sec;
 }
 
+function saveToApi(peaksInstance) {
+  // console.log(points.map(p => ({startTime: p.startTime} = p))); // TODO save
+  var data = {
+    points: peaksInstance.points.getPoints().map((point) => {
+      return {
+        id: point.id,
+        time: point.time,
+        labelText: point.labelText,
+      };
+    }),
+    segments: peaksInstance.segments.getSegments().map((segment) => {
+      return {
+        id: segment.id,
+        startTime: segment.startTime,
+        endTime: segment.endTime,
+        labelText: segment.labelText,
+      };
+    }),
+  };
+
+  fetch("api/update.php?file=" + encodeURIComponent(FILE), {
+    method: "post",
+    body: JSON.stringify(data),
+  }).then((data) => {
+    console.log(data);
+  });
+}
+
+function sendDeleteToApi(id) {
+  fetch(`api/update.php?file=${encodeURIComponent(FILE)}&delete_id=${id}`, {
+    method: "post",
+  }).then((data) => {
+    console.log(data);
+  });
+}
+
 (function (Peaks) {
   Object.assign(options, {
     containers: {
@@ -73,70 +127,19 @@ function formatSecondsAsTime(secs, format) {
     showPlayheadTime: true,
     zoomLevels: [256, 512, 1024, 2048, 4096],
 
-    // zoomview: {
-    //   // Color for the zoomable waveform
-    //   // You can also use a 2 stop gradient here. See setWaveformColor()
-    //   waveformColor: "rgba(0,0,0,0.2)",
-
-    //   // Color for the played region of the zoomable waveform
-    //   // You can also use a 2 stop gradient here. See setWaveformColor()
-    //   playedWaveformColor: "rgba(0,0,0,0.2)",
-    // },
-
-    // overview: {
-    //   // Color for the overview waveform
-    //   // You can also use a 2 stop gradient here. See setWaveformColor()
-    //   waveformColor: "rgba(0,0,0,0.2)",
-
-    //   // Color for the played region of the overview waveform
-    //   // You can also use a 2 stop gradient here. See setWaveformColor()
-    //   playedWaveformColor: "rgba(0, 225, 128, 1)",
-    // },
-    // // Color for the overview waveform
-    // // You can also use a 2 stop gradient here. See setWaveformColor()
-    // waveformColor: "rgba(0,0,0,0.2)",
-
-    // // Color for the played region of the overview waveform
-    // // You can also use a 2 stop gradient here. See setWaveformColor()
-    // playedWaveformColor: "rgba(0, 225, 128, 1)",
+    zoomWaveformColor: getComputedStyle(document.body).getPropertyValue(
+      "--zoom-wave-form-color"
+    ),
+    overviewWaveformColor: getComputedStyle(document.body).getPropertyValue(
+      "--overview-waveform-color"
+    ),
+    pointMarkerColor: getComputedStyle(document.body).getPropertyValue(
+      "--point-marker-color"
+    ),
+    playheadColor: getComputedStyle(document.body).getPropertyValue(
+      "--playhead-color"
+    ),
   });
-
-  var saveToApi = function (peaksInstance) {
-    // console.log(points.map(p => ({startTime: p.startTime} = p))); // TODO save
-
-    var data = {
-      points: peaksInstance.points.getPoints().map((point) => {
-        return {
-          id: point.id,
-          time: point.time,
-          labelText: point.labelText,
-        };
-      }),
-      segments: peaksInstance.segments.getSegments().map((segment) => {
-        return {
-          id: segment.id,
-          startTime: segment.startTime,
-          endTime: segment.endTime,
-          labelText: segment.labelText,
-        };
-      }),
-    };
-
-    fetch("api/update.php?file=" + encodeURIComponent(FILE), {
-      method: "post",
-      body: JSON.stringify(data),
-    }).then((data) => {
-      console.log(data);
-    });
-  };
-
-  var sendDeleteToApi = function (id) {
-    fetch(`api/update.php?file=${encodeURIComponent(FILE)}&delete_id=${id}`, {
-      method: "post",
-    }).then((data) => {
-      console.log(data);
-    });
-  };
 
   var renderSegments = function (peaks) {
     var segmentsContainer = document.getElementById("segments");
@@ -521,22 +524,12 @@ function formatSecondsAsTime(secs, format) {
       } else if (action === "remove-segment" && confirm("Are you sure?")) {
         peaksInstance.segments.removeById(id);
         renderAndSave(peaksInstance);
+      } else if (action === "seek-plus15") {
+        peaksInstance.player.seek(peaksInstance.player.getCurrentTime() + 15);
+      } else if (action === "seek-minus15") {
+        peaksInstance.player.seek(peaksInstance.player.getCurrentTime() - 15);
       }
     });
-
-    var amplitudeScales = {
-      0: 0.0,
-      1: 0.1,
-      2: 0.25,
-      3: 0.5,
-      4: 0.75,
-      5: 1.0,
-      6: 1.5,
-      7: 2.0,
-      8: 3.0,
-      9: 4.0,
-      10: 5.0,
-    };
 
     document
       .getElementById("amplitude-scale")
