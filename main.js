@@ -291,6 +291,9 @@ function formatSecondsAsTime(secs, format) {
             function () {
               this.onclick = function () {
                 console.log(`seeking ${point.time}`);
+                if (!peaks.player.isPlaying()) {
+                  peaks.player.play();
+                }
                 peaks.player.seek(point.time);
               };
               this.oncontextmenu = function (e) {

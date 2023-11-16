@@ -2,17 +2,12 @@
 // php -S localhost:8000
 include "config.php";
 
-$file = $_GET["file"];
-$file_web_path = $media_relative_path . trim($file, '/');
-$wf_dat_file = "$file_web_path.dat";
-$wf_json_file = "$file_web_path.json";
-
 if (!isset($_GET["file"])) {
 
 ?>
   <h1>Index of <?= $media_dir ?></h1>
   <hr />
-  <?
+<?php
 
   function iterateDirectory($i)
   {
@@ -37,14 +32,17 @@ if (!isset($_GET["file"])) {
   iterateDirectory($iterator);
 
   exit;
-} else {
-  ?>
-  <!-- <a href="?">
-      Home
-    </a> -->
-<?
-
 }
+?>
+
+<!-- <a href="?">Home</a> -->
+
+<?php
+
+$file = $_GET["file"];
+$file_web_path = $media_relative_path . trim($file, '/');
+$wf_dat_file = "$file_web_path.dat";
+$wf_json_file = "$file_web_path.json";
 
 ?>
 <!DOCTYPE html>
@@ -130,7 +128,7 @@ if (!isset($_GET["file"])) {
     </div>
 
   </div>
-  <script src="peaks.js"></script>
+  <script src="peaksjs/peaks.js"></script>
   <script>
     const FILE = <?= json_encode($file); ?>;
     var options = {
