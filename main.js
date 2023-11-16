@@ -12,9 +12,13 @@ var amplitudeScales = {
   10: 5.0,
 };
 
-var colorPallettes = {
-  protools: {},
-};
+var zoomLevels = [
+  Math.pow(2, 8),
+  Math.pow(2, 9),
+  Math.pow(2, 10),
+  Math.pow(2, 11),
+  Math.pow(2, 12),
+];
 
 function oneOf() {
   for (var i = 0; i < arguments.length; i++) {
@@ -115,7 +119,7 @@ function sendDeleteToApi(id) {
 }
 
 (function (Peaks) {
-  Object.assign(options, {
+  Object.assign(PEAKSJS_OPTIONS, {
     containers: {
       zoomview: document.getElementById("zoomview-container"),
       overview: document.getElementById("overview-container"),
@@ -123,9 +127,8 @@ function sendDeleteToApi(id) {
     mediaElement: document.getElementById("audio"),
 
     keyboard: true,
-    pointMarkerColor: "#333",
     showPlayheadTime: true,
-    zoomLevels: [256, 512, 1024, 2048, 4096],
+    zoomLevels: zoomLevels,
 
     zoomWaveformColor: getComputedStyle(document.body).getPropertyValue(
       "--zoom-wave-form-color"
@@ -142,136 +145,7 @@ function sendDeleteToApi(id) {
   });
 
   var renderSegments = function (peaks) {
-    var segmentsContainer = document.getElementById("segments");
-    var segments = peaks.segments.getSegments();
-    console.log(segments);
-
-    var html = "";
-
-    for (var i = 0; i < segments.length; i++) {
-      var segment = segments[i];
-
-      var row =
-        "<tr>" +
-        "<td>" +
-        segment.id +
-        "</td>" +
-        '<td><input data-action="update-segment-label" type="text" value="' +
-        segment.labelText +
-        '" data-id="' +
-        segment.id +
-        '"/></td>' +
-        '<td><input data-action="update-segment-start-time" type="number" value="' +
-        segment.startTime +
-        '" data-id="' +
-        segment.id +
-        '"/></td>' +
-        '<td><input data-action="update-segment-end-time" type="number" value="' +
-        segment.endTime +
-        '" data-id="' +
-        segment.id +
-        '"/></td>' +
-        "<td>" +
-        '<a href="#' +
-        segment.id +
-        '" data-action="play-segment" data-id="' +
-        segment.id +
-        '">Play</a>' +
-        "</td>" +
-        "<td>" +
-        '<a href="#' +
-        segment.id +
-        '" data-action="loop-segment" data-id="' +
-        segment.id +
-        '">Loop</a>' +
-        "</td>" +
-        "<td>" +
-        '<a href="#' +
-        segment.id +
-        '" data-action="remove-segment" data-id="' +
-        segment.id +
-        '">Remove</a>' +
-        "</td>" +
-        "</tr>";
-
-      html += row;
-    }
-
-    // segmentsContainer.querySelector("tbody").innerHTML = html;
-
-    if (html.length) {
-      segmentsContainer.classList.remove("hide");
-    }
-
-    document
-      .querySelectorAll('input[data-action="update-segment-start-time"]')
-      .forEach(function (inputElement) {
-        inputElement.addEventListener("input", function (event) {
-          var element = event.target;
-          var id = element.getAttribute("data-id");
-          var segment = peaks.segments.getSegment(id);
-
-          if (segment) {
-            var startTime = parseFloat(element.value);
-
-            if (startTime < 0) {
-              startTime = 0;
-              element.value = 0;
-            }
-
-            if (startTime >= segment.endTime) {
-              startTime = segment.endTime - 0.1;
-              element.value = startTime;
-            }
-
-            segment.update({ startTime: startTime });
-            saveToApi(peaks);
-          }
-        });
-      });
-
-    document
-      .querySelectorAll('input[data-action="update-segment-end-time"]')
-      .forEach(function (inputElement) {
-        inputElement.addEventListener("input", function (event) {
-          var element = event.target;
-          var id = element.getAttribute("data-id");
-          var segment = peaks.segments.getSegment(id);
-
-          if (segment) {
-            var endTime = parseFloat(element.value);
-
-            if (endTime < 0) {
-              endTime = 0;
-              element.value = 0;
-            }
-
-            if (endTime <= segment.startTime) {
-              endTime = segment.startTime + 0.1;
-              element.value = endTime;
-            }
-
-            segment.update({ endTime: endTime });
-            saveToApi(peaks);
-          }
-        });
-      });
-
-    document
-      .querySelectorAll('input[data-action="update-segment-label"]')
-      .forEach(function (inputElement) {
-        inputElement.addEventListener("input", function (event) {
-          var element = event.target;
-          var id = element.getAttribute("data-id");
-          var segment = peaks.segments.getSegment(id);
-          var labelText = element.labelText;
-
-          if (segment) {
-            segment.update({ labelText: labelText });
-            saveToApi(peaks);
-          }
-        });
-      });
+    // not supported
   };
 
   var renderPoints = function (peaks) {
@@ -386,29 +260,44 @@ function sendDeleteToApi(id) {
       });
   };
 
-  var renderAndSave = function (peaks) {
-    renderPoints(peaks);
-    renderSegments(peaks);
-    saveToApi(peaks);
+  var render = function (peaksInstance) {
+    renderPoints(peaksInstance);
+    renderSegments(peaksInstance);
   };
 
-  var renderAndDeleteById = function (peaks, id) {
-    peaks.points.removeById(id);
-    renderPoints(peaks);
-    renderSegments(peaks);
+  var renderAndSave = function (peaksInstance) {
+    render(peaksInstance);
+    saveToApi(peaksInstance);
+  };
+
+  var renderAndDeleteById = function (peaksInstance, id) {
+    peaksInstance.points.removeById(id);
+    render(peaksInstance);
     sendDeleteToApi(id);
   };
 
-  Peaks.init(options, function (err, peaksInstance) {
+  var fetchNewData = function (peaksInstance) {
+    var url = PEAKSJS_OPTIONS.metadataUrl;
+    fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        peaksInstance.segments.removeAll();
+        peaksInstance.points.removeAll();
+        data.segments?.map((segment) => {
+          peaksInstance.segments.add(segment);
+        });
+        data.points?.map((point) => {
+          peaksInstance.points.add(point);
+        });
+        render(peaksInstance);
+      });
+  };
+
+  Peaks.init(PEAKSJS_OPTIONS, function (err, peaksInstance) {
     if (err) {
       console.error(err.message);
       return;
     }
-
-    // does not seem to be supported in my version
-    // var view = peaksInstance.views.getView('zoomview');
-    // view.setWheelMode('scroll');
-
     // enable markers on overview
     const view = peaksInstance.views.getView("overview");
     view.enableMarkerEditing(true);
@@ -427,28 +316,6 @@ function sendDeleteToApi(id) {
       .querySelector('[data-action="zoom-out"]')
       .addEventListener("click", function () {
         peaksInstance.zoom.zoomOut();
-      });
-
-    var segmentCounter = 1;
-
-    document
-      .querySelector('button[data-action="add-segment"]')
-      .addEventListener("click", function () {
-        var startTime = peaksInstance.player.getCurrentTime();
-        var endTime = peaksInstance.player.getCurrentTime() + 100;
-        var commentField = document.getElementById("comment-textarea");
-        var includeTimeField = document.getElementById("include-time-field");
-        var labelText = commentField.value;
-        if (labelText) {
-          commentField.value = "";
-          peaksInstance.segments.add({
-            startTime: includeTimeField.checked ? startTime : 0,
-            endTime: endTime,
-            labelText: labelText,
-            editable: true,
-          });
-          renderAndSave(peaksInstance);
-        }
       });
 
     document
@@ -568,115 +435,17 @@ function sendDeleteToApi(id) {
         }
       });
 
-    document
-      .querySelector('button[data-action="toggle-zoomview"]')
-      .addEventListener("click", function (event) {
-        var container = document.getElementById("zoomview-container");
-        var zoomview = peaksInstance.views.getView("zoomview");
-
-        if (zoomview) {
-          peaksInstance.views.destroyZoomview();
-          container.style.display = "none";
-        } else {
-          container.style.display = "block";
-          peaksInstance.views.createZoomview(container);
-        }
-      });
-
-    document
-      .querySelector('button[data-action="toggle-overview"]')
-      .addEventListener("click", function (event) {
-        var container = document.getElementById("overview-container");
-        var overview = peaksInstance.views.getView("overview");
-
-        if (overview) {
-          peaksInstance.views.destroyOverview();
-          container.style.display = "none";
-        } else {
-          container.style.display = "block";
-          peaksInstance.views.createOverview(container);
-        }
-      });
-
     renderSegments(peaksInstance);
     renderPoints(peaksInstance);
-
-    // Points mouse events
-
-    peaksInstance.on("points.mouseenter", function (point) {
-      console.log("points.mouseenter:", point);
-    });
-
-    peaksInstance.on("points.mouseleave", function (point) {
-      console.log("points.mouseleave:", point);
-    });
-
-    peaksInstance.on("points.dblclick", function (point) {
-      console.log("points.dblclick:", point);
-    });
-
-    peaksInstance.on("points.dragstart", function (point) {
-      console.log("points.dragstart:", point);
-    });
-
-    peaksInstance.on("points.dragmove", function (point) {
-      console.log("points.dragmove:", point);
-    });
 
     peaksInstance.on("points.dragend", function (point) {
       console.log("points.dragend:", point);
       renderAndSave(peaksInstance);
     });
 
-    // Segments mouse events
-
-    peaksInstance.on("segments.dragstart", function (segment, startMarker) {
-      console.log("segments.dragstart:", segment, startMarker);
-    });
-
-    peaksInstance.on("segments.dragend", function (segment, startMarker) {
-      console.log("segments.dragend:", segment, startMarker);
-      renderAndSave(peaksInstance);
-    });
-
-    peaksInstance.on("segments.dragged", function (segment, startMarker) {
-      console.log("segments.dragged:", segment, startMarker);
-    });
-
-    peaksInstance.on("segments.mouseenter", function (segment) {
-      console.log("segments.mouseenter:", segment);
-    });
-
-    peaksInstance.on("segments.mouseleave", function (segment) {
-      console.log("segments.mouseleave:", segment);
-    });
-
-    peaksInstance.on("segments.click", function (segment) {
-      console.log("segments.click:", segment);
-    });
-
-    peaksInstance.on("zoomview.dblclick", function (time) {
-      console.log("zoomview.dblclick:", time);
-    });
-
-    peaksInstance.on("overview.dblclick", function (time) {
-      console.log("overview.dblclick:", time);
-    });
-
-    peaksInstance.on("player.seeked", function (time) {
-      console.log("player.seeked:", time);
-    });
-
-    peaksInstance.on("player.play", function (time) {
-      console.log("player.play:", time);
-    });
-
-    peaksInstance.on("player.pause", function (time) {
-      console.log("player.pause:", time);
-    });
-
-    peaksInstance.on("player.ended", function () {
-      console.log("player.ended");
-    });
+    // Setup polling for fetching new data
+    setInterval(function () {
+      fetchNewData(peaksInstance);
+    }, 15000);
   });
 })(peaks);

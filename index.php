@@ -69,8 +69,8 @@ $wf_json_file = "$file_web_path.json";
       </audio>
 
       <div id="controls">
-        <button class="hide" data-action="zoom-in">Zoom in</button>
-        <button class="hide" data-action="zoom-out">Zoom out</button>
+        <button class="" data-action="zoom-in">Zoom in</button>
+        <button class="" data-action="zoom-out">Zoom out</button>
         <button class="hide" data-action="log-data">Log segments/points</button>
         <input class="hide" type="text" id="seek-time" value="15.0">
         <button class="hide" data-action="seek">Seek</button>
@@ -131,20 +131,22 @@ $wf_json_file = "$file_web_path.json";
   <script src="peaksjs/peaks.js"></script>
   <script>
     const FILE = <?= json_encode($file); ?>;
-    var options = {
+    var PEAKSJS_OPTIONS = {
       dataUri: {
         arraybuffer: <?= json_encode($wf_dat_file) ?>,
       }
     };
 
     var request = new XMLHttpRequest();
-    request.open('GET', 'api/read.php?file=<?= urlencode($file) ?>', false);
+    var metadataUrl = 'api/read.php?file=<?= urlencode($file) ?>';
+    request.open('GET', metadataUrl, false);
     request.send(null);
 
     if (request.status === 200) {
       console.log(request.responseText);
       var serverData = JSON.parse(request.responseText);
-      Object.assign(options, serverData);
+      Object.assign(PEAKSJS_OPTIONS, serverData);
+      PEAKSJS_OPTIONS.metadataUrl = metadataUrl;
     }
   </script>
   <script src="main.js"></script>
