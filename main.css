@@ -2,7 +2,8 @@
   --container-width: 1200px;
   --comments-width: 650px;
   --border-color-1: #ccc;
-
+  --link-color: #007bff;
+  --link-color-hover: #0056b3;
 }
 
 body {
@@ -129,15 +130,23 @@ ul#points-container {
 }
 
 .comment-row {
-  border: 1px solid #ccc;
+  border: 1pt solid var(--link-color);;
   border-radius: 8px;
-  padding: 8px;
+  padding: 8px 8px 8px 12px;
   display: flex;
   flex-direction: row;
+  color: var(--link-color);
+  text-decoration: underline;
 }
 
 .comment-row:hover {
-  border: 1px solid blue;
+  border: 1.5pt solid var(--link-color-hover);
+  color: var(--link-color-hover);
+}
+
+.comment-row:active {
+  border: 2pt solid var(--link-color-hover);
+  color: var(--link-color-hover);
 }
 
 .comment-row>span.comment-text {

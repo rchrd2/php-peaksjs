@@ -93,10 +93,10 @@ $wf_json_file = "$file_web_path.json";
     </div>
 
     <div id="comment-form">
-      <textarea id="comment-textarea" placeholder="Add a comment"></textarea>
+      <textarea id="comment-textarea" placeholder="Add a marker"></textarea>
       <div class="comment-form-bottom">
-        <label>Add comment at current time <input id="include-time-field" type="checkbox" name="current-time" checked /></label>
-        <button data-action="add-point">Add Comment</button>
+        <label>Add marker at current time <input id="include-time-field" type="checkbox" name="current-time" checked /></label>
+        <button data-action="add-point">Add Marker</button>
         <button class="hide" data-action="add-segment">Add a Segment at current time</button>
       </div>
     </div>
@@ -104,7 +104,7 @@ $wf_json_file = "$file_web_path.json";
     <div class="log">
 
       <div id="points" class="hide">
-        <h2>Comments</h2>
+        <h2>Markers</h2>
         <ul id="points-container">
         </ul>
       </div>
