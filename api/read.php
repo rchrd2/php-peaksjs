@@ -17,6 +17,11 @@ if (!file_exists($full_path)) {
 
 $metadata_path = $full_path . '.json';
 
+if (!file_exists($metadata_path)) {
+  echo '{}';
+  exit;
+}
+
 echo file_get_contents($metadata_path);
 
 
