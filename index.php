@@ -2,6 +2,8 @@
 // php -S localhost:8000
 include "config.php";
 
+$ts = time();
+
 if (!isset($_GET["file"])) {
 
 ?>
@@ -52,7 +54,7 @@ $wf_json_file = "$file_web_path.json";
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title><?= $file ?></title>
-  <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="main.css?ts= <?= $ts ?>" />
 </head>
 
 <body>
@@ -149,7 +151,7 @@ $wf_json_file = "$file_web_path.json";
       PEAKSJS_OPTIONS.metadataUrl = metadataUrl;
     }
   </script>
-  <script src="main.js"></script>
+  <script src="main.js?ts=" <?= $ts ?>></script>
 </body>
 
 </html>
