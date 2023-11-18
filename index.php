@@ -151,7 +151,7 @@ $wf_json_file = "$file_web_path.json";
       PEAKSJS_OPTIONS.metadataUrl = metadataUrl;
     }
   </script>
-  <script src="main.js?ts=" <?= $ts ?>></script>
+  <script src="main.js?ts=<?= $ts ?>"></script>
 </body>
 
 </html>
