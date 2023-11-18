@@ -398,6 +398,30 @@ function sendDeleteToApi(id) {
       }
     });
 
+    // Add an event listener so that if nothing is focused and you press spacebar
+    // the audio will play/pause
+    document.addEventListener("keydown", function (e) {
+      console.log(e.keyCode, e.target);
+      if (e.keyCode === 32 && e.target === document.body) {
+        e.preventDefault();
+        if (!peaksInstance.player.isPlaying()) {
+          peaksInstance.player.play();
+        } else {
+          peaksInstance.player.pause();
+        }
+      }
+    });
+
+    // Add an event listener so that if you double click the overview waveform
+    // and it is not playing, it starts playing at that point in time
+    document
+      .getElementById("overview-container")
+      .addEventListener("dblclick", function (e) {
+        if (!peaksInstance.player.isPlaying()) {
+          peaksInstance.player.play();
+        }
+      });
+
     document
       .getElementById("amplitude-scale")
       .addEventListener("input", function (event) {
